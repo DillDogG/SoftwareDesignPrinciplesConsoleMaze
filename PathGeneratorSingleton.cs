@@ -19,7 +19,7 @@ namespace SoftwareDesignPrinciplesConsoleMaze
             return instance.Value;
         }
 
-        public MazeNode GeneratePath(int length, bool correct = true)
+        public MazeNode GeneratePath(int length, int complexity)
         {
             MazeNode startNode = new MazeNode();
             MazeNode currentNode = startNode;
@@ -33,7 +33,7 @@ namespace SoftwareDesignPrinciplesConsoleMaze
                 }
                 else if (correctPath == 1)
                 {
-                    newNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT", i == length - 1);
+                    newNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT", i == length - 1 );
                 }
                 else
                 {
@@ -43,9 +43,9 @@ namespace SoftwareDesignPrinciplesConsoleMaze
                 // For displaying the path in presentation
                 Console.WriteLine(newNode.NodeName);
                 int wrongCount = rand.Next(0, 3);
-                MazeNode wrongNode = new MazeNode();
                 if (wrongCount == 1)
                 {
+                    MazeNode wrongNode = new MazeNode();
                     int wrongDirection = rand.Next(0, 2);
                     if (wrongDirection == 0)
                     {
@@ -70,29 +70,40 @@ namespace SoftwareDesignPrinciplesConsoleMaze
                         }
                     }
                     currentNode.AddPath(wrongNode);
+                    if (complexity > 0)
+                    {
+                        GenerateFailed(wrongNode);
+                    }
                 }
                 else if (wrongCount == 2)
                 {
+                    MazeNode wrongNode = new MazeNode();
+                    MazeNode wrongNode2 = new MazeNode();
                     if (correctPath == 0)
                     {
                         wrongNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT");
                         currentNode.AddPath(wrongNode);
-                        wrongNode.MakeNode(new List<MazeNode>(), currentNode, "RIGHT");
-                        currentNode.AddPath(wrongNode);
+                        wrongNode2.MakeNode(new List<MazeNode>(), currentNode, "RIGHT");
+                        currentNode.AddPath(wrongNode2);
                     }
                     else if (correctPath == 1)
                     {
                         wrongNode.MakeNode(new List<MazeNode>(), currentNode, "LEFT");
                         currentNode.AddPath(wrongNode);
-                        wrongNode.MakeNode(new List<MazeNode>(), currentNode, "RIGHT");
-                        currentNode.AddPath(wrongNode);
+                        wrongNode2.MakeNode(new List<MazeNode>(), currentNode, "RIGHT");
+                        currentNode.AddPath(wrongNode2);
                     }
                     else
                     {
                         wrongNode.MakeNode(new List<MazeNode>(), currentNode, "LEFT");
                         currentNode.AddPath(wrongNode);
-                        wrongNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT");
-                        currentNode.AddPath(wrongNode);
+                        wrongNode2.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT");
+                        currentNode.AddPath(wrongNode2);
+                    }
+                    if (complexity > 0)
+                    {
+                        GenerateFailed(wrongNode);
+                        GenerateFailed(wrongNode2);
                     }
                 }
                 currentNode = newNode;
@@ -100,11 +111,77 @@ namespace SoftwareDesignPrinciplesConsoleMaze
             return startNode;
         }
 
+        public void GenerateFailed(MazeNode previous)
+        {
+            int pathCount = rand.Next(0, 4);
+            int paths = rand.Next(0, 3);
+            switch (pathCount)
+            {
+                case 1:
+                    {
+                        MazeNode node1 = new MazeNode();
+                        if (paths == 0)
+                        {
+                            node1.MakeNode(new List<MazeNode>(), previous, "LEFT");
+                        }
+                        else if (paths == 1)
+                        {
+                            node1.MakeNode(new List<MazeNode>(), previous, "STRAIGHT");
+                        }
+                        else
+                        {
+                            node1.MakeNode(new List<MazeNode>(), previous, "RIGHT");
+                        }
+                        previous.AddPath(node1);
+                    }
+                    break;
+
+                case 2:
+                    {
+                        MazeNode node1 = new MazeNode();
+                        MazeNode node2 = new MazeNode();
+                        if (paths == 0)
+                        {
+                            node1.MakeNode(new List<MazeNode>(), previous, "STRAIGHT");
+                            node2.MakeNode(new List<MazeNode>(), previous, "RIGHT");
+                        }
+                        else if (paths == 1)
+                        {
+                            node1.MakeNode(new List<MazeNode>(), previous, "LEFT");
+                            node2.MakeNode(new List<MazeNode>(), previous, "RIGHT");
+                        }
+                        else
+                        {
+                            node1.MakeNode(new List<MazeNode>(), previous, "LEFT");
+                            node2.MakeNode(new List<MazeNode>(), previous, "STRAIGHT");
+                        }
+                        previous.AddPath(node1);
+                        previous.AddPath(node2);
+                    }
+                    break;
+                case 3:
+                    {
+                        MazeNode node1 = new MazeNode();
+                        MazeNode node2 = new MazeNode();
+                        MazeNode node3 = new MazeNode();
+                        node1.MakeNode(new List<MazeNode>(), previous, "LEFT");
+                        node2.MakeNode(new List<MazeNode>(), previous, "STRAIGHT");
+                        node3.MakeNode(new List<MazeNode>(), previous, "RIGHT");
+                        previous.AddPath(node1);
+                        previous.AddPath(node2);
+                        previous.AddPath(node3);
+                    }
+                    break;
+                default:
+                    return;
+            }
+        }
+
         public void ShowPath(MazeNode node)
         {
             if (node.potentialPaths.Count < 1)
             {
-                Console.WriteLine($"You have reached a dead end. You can only go to the PREVIOUS path right now.");
+                Console.WriteLine("You have reached a dead end. You can only go to the PREVIOUS path right now.");
                 return;
             }
             Console.Write("You can see the following paths ahead. ");
@@ -114,7 +191,7 @@ namespace SoftwareDesignPrinciplesConsoleMaze
             }
             if (node.previousNode != null)
             {
-                Console.Write($" or PREVIOUS to go back to the previous node");
+                Console.Write(" or PREVIOUS to go back to the previous node");
             }
             Console.WriteLine(".");
             return;

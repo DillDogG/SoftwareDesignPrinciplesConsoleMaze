@@ -7,118 +7,151 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace SoftwareDesignPrinciplesConsoleMaze
 {
-    internal class StateSystem
+    interface gameState
     {
-        interface gameState
+        int getLength();
+        int getComplexity();
+        bool getGameOver();
+    }
+    
+    class StartState : gameState
+    {
+        public int getLength()
         {
-            int getLength();
-            int getComplexity();
-            bool getGameOver();
+            return 0;
+        }
+        public int getComplexity()
+        {
+            return 0;
+        }
+        public bool getGameOver()
+        {
+            return false;
+        }
+    }
+    
+    class WinState : gameState
+    {
+        public int getLength()
+        {
+            return 0;
+        }
+        public int getComplexity()
+        {
+            return 0;
+        }
+        public bool getGameOver()
+        {
+            return true;
+        }
+    }
+    
+    class EasyState : gameState
+    {
+        public int getLength()
+        {
+            return 4;
+        }
+        public int getComplexity()
+        {
+            return 0;
+        }
+        public bool getGameOver()
+        {
+            return false;
+        }
+    }
+    
+    class MediumState : gameState
+    {
+        public int getLength()
+        {
+            return 7;
+        }
+        public int getComplexity()
+        {
+            return 0;
+        }
+        public bool getGameOver()
+        {
+            return false;
+        }
+    }
+    
+    class HardState : gameState
+    {
+        public int getLength()
+        {
+            return 6;
+        }
+        public int getComplexity()
+        {
+            return 1;
+        }
+        public bool getGameOver()
+        {
+            return false;
+        }
+    }
+    
+    class gameContext
+    {
+        public gameState state = new StartState();
+    
+        public void setState(gameState state)
+        {
+            this.state = state;
+        }
+    
+        public int Length()
+        {
+            return state.getLength();
+        }
+    
+        public int Complexity()
+        {
+            return state.getComplexity();
+        }
+    
+        public bool GameOver()
+        {
+            return state.getGameOver();
+        }
+    }
+
+    class StateKeeper
+    {
+        StartState startState = new StartState();
+        WinState winState = new WinState();
+        EasyState easyState = new EasyState();
+        MediumState mediumState = new MediumState();
+        HardState hardState = new HardState();
+
+        public gameContext context = new gameContext();
+
+        public StateKeeper()
+        {
+            context.setState(startState);
         }
 
-        class StartState : gameState
+        public void SetState(string state)
         {
-            public int getLength()
-            {
-                return 0;
-            }
-            public int getComplexity()
-            {
-                return 0;
-            }
-            public bool getGameOver()
-            {
-                return false;
-            }
+            if (state.ToUpper() == "EASY") context.setState(easyState);
+            else if (state.ToUpper() == "MEDIUM") context.setState(mediumState);
+            else if (state.ToUpper() == "HARD") context.setState(hardState);
+            else if (state.ToUpper() == "WIN") context.setState(winState);
+            else context.setState(startState);
         }
 
-        class WinState : gameState
+        public bool IsGameOver()
         {
-            public int getLength()
-            {
-                return 0;
-            }
-            public int getComplexity()
-            {
-                return 0;
-            }
-            public bool getGameOver()
-            {
-                return true;
-            }
+            return context.GameOver();
         }
 
-        class EasyState : gameState
+        public bool IsGameRunning()
         {
-            public int getLength()
-            {
-                return 4;
-            }
-            public int getComplexity()
-            {
-                return 0;
-            }
-            public bool getGameOver()
-            {
-                return false;
-            }
-        }
-
-        class MediumState : gameState
-        {
-            public int getLength()
-            {
-                return 5;
-            }
-            public int getComplexity()
-            {
-                return 1;
-            }
-            public bool getGameOver()
-            {
-                return false;
-            }
-        }
-
-        class HardState : gameState
-        {
-            public int getLength()
-            {
-                return 6;
-            }
-            public int getComplexity()
-            {
-                return 2;
-            }
-            public bool getGameOver()
-            {
-                return false;
-            }
-        }
-
-        class gameContext
-        {
-            public gameState state = new StartState();
-
-            public void setState(gameState state)
-            {
-                this.state = state;
-            }
-
-            public int Length()
-            {
-                return state.getLength();
-            }
-
-            public int Complexity()
-            {
-                return state.getComplexity();
-            }
-
-            public bool GameOver()
-            {
-                return state.getGameOver();
-            }
+            if (context.state is EasyState || context.state is MediumState || context.state is HardState) return true;
+            else return false;
         }
     }
 }

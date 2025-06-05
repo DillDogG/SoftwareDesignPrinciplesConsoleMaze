@@ -30,6 +30,7 @@
         public void AddPath(MazeNode node)
         {
             potentialPaths.Add(node);
+            potentialPaths.Sort((x, y) => x.NodeName.CompareTo(y.NodeName));
         }
     }
 
@@ -38,14 +39,25 @@
         static void Main()
         {
             PathGeneratorSingleton pathGenerator = PathGeneratorSingleton.GetInstance();
-            MazeNode startNode = pathGenerator.GeneratePath(5);
-            MazeNode currentNode = startNode;
+            StateKeeper stateKeeper = new StateKeeper();
             Console.WriteLine("Welcome to the Maze!");
-            while (!currentNode.FinalNode)
+            while (!stateKeeper.IsGameRunning())
+            {
+                Console.WriteLine("Select a difficult. EASY, MEDIUM, or HARD.");
+                string? difficulty = Console.ReadLine();
+                if (difficulty.ToUpper() == "EASY") stateKeeper.SetState(difficulty);
+                else if (difficulty.ToUpper() == "MEDIUM") stateKeeper.SetState(difficulty);
+                else if (difficulty.ToUpper() == "HARD") stateKeeper.SetState(difficulty);
+                else Console.WriteLine("Invalid difficulty.");
+            }
+            MazeNode startNode = pathGenerator.GeneratePath(stateKeeper.context.Length(), stateKeeper.context.Complexity());
+            MazeNode currentNode = startNode;
+            while (!stateKeeper.IsGameOver())
             {
                 pathGenerator.ShowPath(currentNode);
                 string? userInput = Console.ReadLine();
                 currentNode = pathGenerator.MoveToNextNode(currentNode, userInput);
+                if (currentNode.FinalNode) stateKeeper.SetState("WIN");
             }
             Console.WriteLine("Congratulations! You've reached the end of the maze.");
         }
