@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace SoftwareDesignPrinciplesConsoleMaze
 {
+    // A singleton is used here to prevent multiple mazes from getting made, or parts of it going missing. It also highly limits duplication of the state system.
+    // However if it is ever needed the state system can have duplicates.
     public class PathGeneratorSingleton
     {
         private static readonly Lazy<PathGeneratorSingleton> instance = new Lazy<PathGeneratorSingleton>(() => new PathGeneratorSingleton());
@@ -19,6 +21,7 @@ namespace SoftwareDesignPrinciplesConsoleMaze
             return instance.Value;
         }
 
+        // Generates the path the maze takes
         public MazeNode GeneratePath(int length, int complexity)
         {
             MazeNode startNode = new MazeNode();
@@ -27,18 +30,9 @@ namespace SoftwareDesignPrinciplesConsoleMaze
             {
                 MazeNode newNode = new MazeNode();
                 int correctPath = rand.Next(0, 3);
-                if (correctPath == 0)
-                {
-                    newNode.MakeNode(new List<MazeNode>(), currentNode, "LEFT", i == length - 1);
-                }
-                else if (correctPath == 1)
-                {
-                    newNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT", i == length - 1 );
-                }
-                else
-                {
-                    newNode.MakeNode(new List<MazeNode>(), currentNode, "RIGHT", i == length - 1);
-                }
+                if (correctPath == 0) newNode.MakeNode(new List<MazeNode>(), currentNode, "LEFT", i == length - 1);
+                else if (correctPath == 1) newNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT", i == length - 1 );
+                else newNode.MakeNode(new List<MazeNode>(), currentNode, "RIGHT", i == length - 1);
                 currentNode.AddPath(newNode);
                 // For displaying the path in presentation
                 Console.WriteLine(newNode.NodeName);
@@ -49,31 +43,16 @@ namespace SoftwareDesignPrinciplesConsoleMaze
                     int wrongDirection = rand.Next(0, 2);
                     if (wrongDirection == 0)
                     {
-                        if (correctPath == 0)
-                        {
-                            wrongNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT");
-                        }
-                        else
-                        {
-                            wrongNode.MakeNode(new List<MazeNode>(), currentNode, "LEFT");
-                        }
+                        if (correctPath == 0) wrongNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT");
+                        else wrongNode.MakeNode(new List<MazeNode>(), currentNode, "LEFT");
                     }
                     else
                     {
-                        if (correctPath == 2)
-                        {
-                            wrongNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT");
-                        }
-                        else
-                        {
-                            wrongNode.MakeNode(new List<MazeNode>(), currentNode, "RIGHT");
-                        }
+                        if (correctPath == 2) wrongNode.MakeNode(new List<MazeNode>(), currentNode, "STRAIGHT");
+                        else wrongNode.MakeNode(new List<MazeNode>(), currentNode, "RIGHT");
                     }
                     currentNode.AddPath(wrongNode);
-                    if (complexity > 0)
-                    {
-                        GenerateFailed(wrongNode);
-                    }
+                    if (complexity > 0) GenerateFailed(wrongNode);
                 }
                 else if (wrongCount == 2)
                 {
@@ -111,6 +90,7 @@ namespace SoftwareDesignPrinciplesConsoleMaze
             return startNode;
         }
 
+        // Generates any paths that don't lead anywhere, only used when complexity is greater than 0.
         public void GenerateFailed(MazeNode previous)
         {
             int pathCount = rand.Next(0, 4);
@@ -120,18 +100,9 @@ namespace SoftwareDesignPrinciplesConsoleMaze
                 case 1:
                     {
                         MazeNode node1 = new MazeNode();
-                        if (paths == 0)
-                        {
-                            node1.MakeNode(new List<MazeNode>(), previous, "LEFT");
-                        }
-                        else if (paths == 1)
-                        {
-                            node1.MakeNode(new List<MazeNode>(), previous, "STRAIGHT");
-                        }
-                        else
-                        {
-                            node1.MakeNode(new List<MazeNode>(), previous, "RIGHT");
-                        }
+                        if (paths == 0) node1.MakeNode(new List<MazeNode>(), previous, "LEFT");
+                        else if (paths == 1) node1.MakeNode(new List<MazeNode>(), previous, "STRAIGHT");
+                        else node1.MakeNode(new List<MazeNode>(), previous, "RIGHT");
                         previous.AddPath(node1);
                     }
                     break;
@@ -177,6 +148,7 @@ namespace SoftwareDesignPrinciplesConsoleMaze
             }
         }
 
+        // Displays the options to the user.
         public void ShowPath(MazeNode node)
         {
             if (node.potentialPaths.Count < 1)
@@ -185,29 +157,18 @@ namespace SoftwareDesignPrinciplesConsoleMaze
                 return;
             }
             Console.Write("You can see the following paths ahead. ");
-            foreach (var path in node.potentialPaths)
-            {
-                Console.Write($" {path.NodeName}");
-            }
-            if (node.previousNode != null)
-            {
-                Console.Write(" or PREVIOUS to go back to the previous node");
-            }
+            foreach (var path in node.potentialPaths) Console.Write($" {path.NodeName}");
+            if (node.previousNode != null) Console.Write(" or PREVIOUS to go back to the previous node");
             Console.WriteLine(".");
             return;
         }
 
+        // Moves to the next node based on user input.
         public MazeNode MoveToNextNode(MazeNode currentNode, string direction)
         {
-            if (direction.ToUpper() == "PREVIOUS")
-            {
-                return currentNode.previousNode ?? currentNode;
-            }
+            if (direction.ToUpper() == "PREVIOUS") return currentNode.previousNode ?? currentNode;
             var nextNode = currentNode.potentialPaths.FirstOrDefault(p => p.NodeName.Equals(direction, StringComparison.OrdinalIgnoreCase));
-            if (nextNode != null)
-            {
-                return nextNode;
-            }
+            if (nextNode != null) return nextNode;
             Console.WriteLine("Invalid direction. Please choose a valid path.");
             return currentNode;
         }

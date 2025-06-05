@@ -94,6 +94,8 @@ namespace SoftwareDesignPrinciplesConsoleMaze
         }
     }
     
+    // States are used to allow for users to select their game difficulty. It also makes for easy changing the numbers on each difficulty.
+    // It is also used in while statements to keep the user on selecting a difficulty, or preventing the game from ending early.
     class gameContext
     {
         public gameState state = new StartState();
@@ -119,6 +121,7 @@ namespace SoftwareDesignPrinciplesConsoleMaze
         }
     }
 
+    // The Facade system was used to hide the state system better, and make it more difficult to alter. It also contains all functions that are done based on the current state.
     class StateKeeper
     {
         StartState startState = new StartState();
